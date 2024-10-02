@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Name: Dawid Biel UIN: 665470421
 HW 2 Cloud Computing This is a program for parallel distributed processing of a large corpus of text.
 
@@ -30,3 +31,6 @@ to test use
 sbt test
 
 
+=======
+my njame is Daiwd biel and I am doing this projeict
+>>>>>>> 1d547d8 (Create README.md)
