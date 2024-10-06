@@ -2,17 +2,17 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class TokenizerTest extends AnyFunSuite {
 
-  test("Tokenizer should generate tokens for a given text") {
-    val shardPath = "testResources/sampleShard.txt"
+  test("Tokenizer test generate tokens") {
+    val shardPath = "testResources/sample.txt"
 
-    val tokenized = Tokenizer.tokenizeShard(shardPath)
-    assert(tokenized.size() > 0, "Tokenizer should generate tokens for non-empty text.")
+    val tokenized = Tokenizer.tokenize_shard(shardPath)
+    assert(tokenized.size() > 0, "Any non zero should return with tokens")
   }
 
-  test("Tokenizer should handle empty shard file gracefully") {
+  test("Empty token test") {
     val shardPath = "testResources/emptyShard.txt"
 
-    val tokenized = Tokenizer.tokenizeShard(shardPath)
-    assert(tokenized.isEmpty, "Tokenizer should return an empty token list for an empty shard.")
+    val tokenized = Tokenizer.tokenize_shard(shardPath)
+    assert(tokenized.isEmpty, "Empty token test")
   }
 }

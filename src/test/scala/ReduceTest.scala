@@ -4,31 +4,29 @@ import scala.collection.JavaConverters._
 
 class ReduceTest extends AnyFunSuite {
 
-  test("WordCountReducer should correctly sum values") {
-    val reducer = new WordCountReducer()
+  test("Word_Count_Reducer should sum values") {
+    val reducer = new Word_Count_Reducer()
 
-    // Test the reduceValues function directly
+    // test reduce_values
     val values = List(new IntWritable(1), new IntWritable(2), new IntWritable(3)).asJava
-    val result = reducer.reduceValues(values)
+    val result = reducer.reduce_values(values)
 
     // Expected output
     val expectedSum = 6
-
-    // Assert the sum
-    assert(result == expectedSum, "The reducer should correctly sum the values.")
+    assert(result == expectedSum, "Reducer should correctly reduce.")
   }
 
-  test("WordCountReducer should return 0 for empty values") {
-    val reducer = new WordCountReducer()
+  test("Word_Count_Reducer must return 0 for empty list") {
+    val reducer = new Word_Count_Reducer()
 
-    // Test the reduceValues function with an empty list
+    // test with empty list
     val values = List.empty[IntWritable].asJava
-    val result = reducer.reduceValues(values)
+    val result = reducer.reduce_values(values)
 
     // Expected output
     val expectedSum = 0
 
-    // Assert the sum
-    assert(result == expectedSum, "The reducer should return 0 for an empty list of values.")
+
+    assert(result == expectedSum, "The reducer should return 0")
   }
 }

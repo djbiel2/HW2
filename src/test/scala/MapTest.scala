@@ -4,16 +4,15 @@ import scala.collection.mutable
 
 class MapTest extends AnyFunSuite {
 
-  test("WordCountMapper should produce correct key-value pairs") {
-    val mapper = new WordCountMapper()
+  test("Word_Count_Mapper should produce correct mappings") {
+    val mapper = new Word_Count_Mapper()
 
-    // Test the mapLine function directly
-    val result = mapper.mapLine("hello world")
+    // Test map_line
+    val result = mapper.map_line("hello professor")
 
     // Expected output
-    val expectedOutput = Seq((new Text("hello"), new IntWritable(1)), (new Text("world"), new IntWritable(1)))
+    val expectedOutput = Seq((new Text("hello"), new IntWritable(1)), (new Text("professor"), new IntWritable(1)))
 
-    // Assert each output
     assert(result == expectedOutput)
   }
 }
