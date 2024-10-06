@@ -7,66 +7,64 @@ import com.typesafe.config.ConfigFactory
 
 object Tokenizer {
 
-  // Create a logger for this class
+//logger
   private val logger = LoggerFactory.getLogger(Tokenizer.getClass)
 
-  /**
-   * Function to tokenize each shard using the specified encoding.
-   * @param shardPath Path to the shard file to tokenize.
-   * @return Encoded tokens as an IntArrayList.
-   */
-  def tokenizeShard(shardPath: String): IntArrayList = {
+
+// Function to tokenize shards
+
+  def tokenize_shard(shard_path: String): IntArrayList = {
     try {
-      logger.info(s"Tokenizing shard at path: $shardPath")
+      logger.info(s"Tokenizing shard -$shard_path")
       val registry: EncodingRegistry = Encodings.newDefaultEncodingRegistry()
       val encoding: Encoding = registry.getEncoding(EncodingType.CL100K_BASE)
-      val shardText = Source.fromFile(shardPath).mkString
-      val encoded: IntArrayList = encoding.encode(shardText)
+      val shard_text = Source.fromFile(shard_path).mkString
+      val encoded: IntArrayList = encoding.encode(shard_text)
 
-      // Check if the encoded tokens are empty
+    //check if tokens are empty
       if (encoded.isEmpty) {
-        logger.warn(s"Tokenization produced an empty result for shard: $shardPath")
+        logger.warn(s"Tokens are empty $shard_path")
       } else {
-        logger.info(s"Tokenization complete for shard: $shardPath with ${encoded.size()} tokens")
+        logger.info(s"Tokens completed $shard_path ")
       }
 
       encoded
     } catch {
       case e: Exception =>
-        logger.error(s"An error occurred while tokenizing shard: $shardPath", e)
+        logger.error(s"Tokenizing error", e)
         new IntArrayList()
     }
   }
 
   def main(args: Array[String]): Unit = {
-    // Load configuration
+
     val config = ConfigFactory.load()
-    val shardDirectoryPath = config.getString("tokenizer.shardDirectory")
+    val shard_directory_path = config.getString("tokenizer.shard_directory")
 
     try {
-      val shardDirectory = new File(shardDirectoryPath)
-      if (!shardDirectory.exists() || !shardDirectory.isDirectory) {
-        logger.error(s"Shard directory not found or is not a directory: $shardDirectoryPath")
+      val shard_directory = new File(shard_directory_path)
+      if (!shard_directory.exists() || !shard_directory.isDirectory) {
+        logger.error(s"Shard directory not found, error")
         return
       }
 
-      val shardFiles = shardDirectory.listFiles().filter(_.isFile).filter(_.getName.startsWith("shard_"))
-      if (shardFiles.isEmpty) {
-        logger.warn(s"No shard files found in the directory: $shardDirectoryPath")
+      val shard_files = shard_directory.listFiles().filter(_.isFile).filter(_.getName.startsWith("shard_"))
+      if (shard_files.isEmpty) {
+        logger.warn(s"No shard files found, error")
         return
       }
 
-      // Iterate over all shard files and tokenize them
-      shardFiles.foreach { shardFile =>
-        logger.info(s"Processing shard: ${shardFile.getName}")
-        val tokenized = tokenizeShard(shardFile.getAbsolutePath)
+      // Iterate over all shards
+      shard_files.foreach { shard_file =>
+        logger.info(s"Processing shard- ${shard_file.getName}")
+        val tokenized = tokenize_shard(shard_file.getAbsolutePath)
         if (!tokenized.isEmpty) {
-          logger.debug(s"Encoded Tokens for ${shardFile.getName}: ${tokenized.toArray.mkString(", ")}")
+          logger.debug(s"Encoded tokens for ${shard_file.getName}")
         }
       }
     } catch {
       case e: Exception =>
-        logger.error("An error occurred while processing shard files for tokenization.", e)
+        logger.error("Processing error for shards for tokens", e)
     }
   }
 }
