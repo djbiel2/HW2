@@ -1,0 +1,59 @@
+<html>
+<head>
+<title>Hadoop.scala</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #56a8f5;}
+.s5 { color: #2aacb8;}
+.s6 { color: #6aab73;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Hadoop.scala</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">apache</span><span class="s2">.</span><span class="s1">hadoop</span><span class="s2">.</span><span class="s1">conf</span><span class="s2">.</span><span class="s1">Configuration</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">apache</span><span class="s2">.</span><span class="s1">hadoop</span><span class="s2">.</span><span class="s1">fs</span><span class="s2">.</span><span class="s1">Path</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">apache</span><span class="s2">.</span><span class="s1">hadoop</span><span class="s2">.</span><span class="s1">io</span><span class="s2">.{</span><span class="s1">IntWritable</span><span class="s2">, </span><span class="s1">Text</span><span class="s2">}</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">apache</span><span class="s2">.</span><span class="s1">hadoop</span><span class="s2">.</span><span class="s1">mapreduce</span><span class="s2">.</span><span class="s1">Job</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">apache</span><span class="s2">.</span><span class="s1">hadoop</span><span class="s2">.</span><span class="s1">mapreduce</span><span class="s2">.</span><span class="s1">lib</span><span class="s2">.</span><span class="s1">input</span><span class="s2">.</span><span class="s1">FileInputFormat</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">apache</span><span class="s2">.</span><span class="s1">hadoop</span><span class="s2">.</span><span class="s1">mapreduce</span><span class="s2">.</span><span class="s1">lib</span><span class="s2">.</span><span class="s1">output</span><span class="s2">.</span><span class="s1">FileOutputFormat</span>
+<span class="s3">//Hadoop setup for distributed processing</span>
+<span class="s0">object </span><span class="s2">Hadoop {</span>
+  <span class="s0">def </span><span class="s4">main</span><span class="s2">(</span><span class="s1">args: Array</span><span class="s2">[</span><span class="s1">String</span><span class="s2">])</span><span class="s1">: Unit </span><span class="s2">= {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">args</span><span class="s2">.</span><span class="s1">length != </span><span class="s5">2</span><span class="s2">) {</span>
+      <span class="s1">println</span><span class="s2">(</span><span class="s6">&quot;Hadoop input  output &quot;</span><span class="s2">)</span>
+      <span class="s1">System</span><span class="s2">.</span><span class="s1">exit</span><span class="s2">(</span><span class="s1">-</span><span class="s5">1</span><span class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s3">//configs and job instance</span>
+    <span class="s0">val </span><span class="s2">conf = </span><span class="s0">new </span><span class="s1">Configuration</span><span class="s2">()</span>
+    <span class="s0">val </span><span class="s2">job = </span><span class="s1">Job</span><span class="s2">.</span><span class="s1">getInstance</span><span class="s2">(</span><span class="s1">conf</span><span class="s2">, </span><span class="s6">&quot;Word Count&quot;</span><span class="s2">)</span>
+
+
+    <span class="s1">job</span><span class="s2">.</span><span class="s1">setJarByClass</span><span class="s2">(</span><span class="s1">classOf</span><span class="s2">[</span><span class="s1">Word_Count_Mapper</span><span class="s2">])</span>
+    <span class="s3">//setting mapping and reducer classes</span>
+
+    <span class="s1">job</span><span class="s2">.</span><span class="s1">setMapperClass</span><span class="s2">(</span><span class="s1">classOf</span><span class="s2">[</span><span class="s1">Word_Count_Mapper</span><span class="s2">])</span>
+    <span class="s1">job</span><span class="s2">.</span><span class="s1">setReducerClass</span><span class="s2">(</span><span class="s1">classOf</span><span class="s2">[</span><span class="s1">Word_Count_Reducer</span><span class="s2">])</span>
+
+    <span class="s3">//setting output classes</span>
+    <span class="s1">job</span><span class="s2">.</span><span class="s1">setOutputKeyClass</span><span class="s2">(</span><span class="s1">classOf</span><span class="s2">[</span><span class="s1">Text</span><span class="s2">])</span>
+    <span class="s1">job</span><span class="s2">.</span><span class="s1">setOutputValueClass</span><span class="s2">(</span><span class="s1">classOf</span><span class="s2">[</span><span class="s1">IntWritable</span><span class="s2">])</span>
+
+    <span class="s3">// setting input and ouputclases</span>
+    <span class="s1">FileInputFormat</span><span class="s2">.</span><span class="s1">addInputPath</span><span class="s2">(</span><span class="s1">job</span><span class="s2">, </span><span class="s0">new </span><span class="s1">Path</span><span class="s2">(</span><span class="s1">args</span><span class="s2">(</span><span class="s5">0</span><span class="s2">)))</span>
+    <span class="s1">FileOutputFormat</span><span class="s2">.</span><span class="s1">setOutputPath</span><span class="s2">(</span><span class="s1">job</span><span class="s2">, </span><span class="s0">new </span><span class="s1">Path</span><span class="s2">(</span><span class="s1">args</span><span class="s2">(</span><span class="s5">1</span><span class="s2">)))</span>
+
+    <span class="s3">// run the job but exit if unsuccessful</span>
+    <span class="s1">System</span><span class="s2">.</span><span class="s1">exit</span><span class="s2">(</span><span class="s0">if </span><span class="s2">(</span><span class="s1">job</span><span class="s2">.</span><span class="s1">waitForCompletion</span><span class="s2">(</span><span class="s0">true</span><span class="s2">)) </span><span class="s5">0 </span><span class="s0">else </span><span class="s5">1</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

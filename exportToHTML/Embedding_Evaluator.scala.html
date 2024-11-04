@@ -1,0 +1,108 @@
+<html>
+<head>
+<title>Embedding_Evaluator.scala</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #56a8f5;}
+.s5 { color: #6aab73;}
+.s6 { color: #2aacb8;}
+.s7 { color: #00b8bb; font-weight: bold;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Embedding_Evaluator.scala</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">deeplearning4j</span><span class="s2">.</span><span class="s1">models</span><span class="s2">.</span><span class="s1">embeddings</span><span class="s2">.</span><span class="s1">loader</span><span class="s2">.</span><span class="s1">WordVectorSerializer</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">deeplearning4j</span><span class="s2">.</span><span class="s1">models</span><span class="s2">.</span><span class="s1">embeddings</span><span class="s2">.</span><span class="s1">wordvectors</span><span class="s2">.</span><span class="s1">WordVectors</span>
+<span class="s0">import </span><span class="s1">java</span><span class="s2">.</span><span class="s1">io</span><span class="s2">.</span><span class="s1">File</span>
+<span class="s0">import </span><span class="s1">java</span><span class="s2">.</span><span class="s1">util</span><span class="s2">.{</span><span class="s1">List </span><span class="s2">=&gt; </span><span class="s1">JList</span><span class="s2">, </span><span class="s1">Collection </span><span class="s2">=&gt; </span><span class="s1">JCollection</span><span class="s2">}</span>
+<span class="s0">import </span><span class="s1">scala</span><span class="s2">.</span><span class="s1">collection</span><span class="s2">.</span><span class="s1">JavaConverters</span><span class="s2">.</span><span class="s1">_</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">slf4j</span><span class="s2">.</span><span class="s1">LoggerFactory</span>
+<span class="s0">import </span><span class="s1">com</span><span class="s2">.</span><span class="s1">typesafe</span><span class="s2">.</span><span class="s1">config</span><span class="s2">.</span><span class="s1">ConfigFactory</span>
+<span class="s0">import </span><span class="s1">org</span><span class="s2">.</span><span class="s1">nd4j</span><span class="s2">.</span><span class="s1">linalg</span><span class="s2">.</span><span class="s1">api</span><span class="s2">.</span><span class="s1">ndarray</span><span class="s2">.</span><span class="s1">INDArray</span>
+<span class="s0">import </span><span class="s1">java</span><span class="s2">.</span><span class="s1">lang</span><span class="s2">.</span><span class="s1">management</span><span class="s2">.</span><span class="s1">ManagementFactory</span>
+
+
+<span class="s0">object </span><span class="s2">Embedding_Evaluator {</span>
+
+  <span class="s3">// creating a logger</span>
+  <span class="s0">private val </span><span class="s2">logger = </span><span class="s1">LoggerFactory</span><span class="s2">.</span><span class="s1">getLogger</span><span class="s2">(</span><span class="s1">Embedding_Evaluator</span><span class="s2">.</span><span class="s1">getClass</span><span class="s2">)</span>
+
+  <span class="s3">// Function to find words that are semantically close to each other</span>
+  <span class="s0">def </span><span class="s4">evaluate_embeddings</span><span class="s2">(</span><span class="s1">model_output_path: String</span><span class="s2">, </span><span class="s1">words_to_evaluate: List</span><span class="s2">[</span><span class="s1">String</span><span class="s2">])</span><span class="s1">: Unit </span><span class="s2">= {</span>
+    <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">&quot;Starting embedding function&quot;</span><span class="s2">)</span>
+    <span class="s0">val </span><span class="s2">start_time = </span><span class="s1">System</span><span class="s2">.</span><span class="s1">currentTimeMillis</span><span class="s2">()</span>
+
+    <span class="s0">try </span><span class="s2">{</span>
+      <span class="s3">// Loading model</span>
+      <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">s&quot;Loading model &quot;</span><span class="s2">)</span>
+      <span class="s0">val </span><span class="s2">model_file = </span><span class="s0">new </span><span class="s1">File</span><span class="s2">(</span><span class="s1">model_output_path</span><span class="s2">)</span>
+
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">!model_file</span><span class="s2">.</span><span class="s1">exists</span><span class="s2">()) {</span>
+        <span class="s1">logger</span><span class="s2">.</span><span class="s1">error</span><span class="s2">(</span><span class="s5">s&quot;Model not found &quot;</span><span class="s2">)</span>
+        <span class="s0">return</span>
+      <span class="s2">}</span>
+
+      <span class="s0">val </span><span class="s2">word2vec_model</span><span class="s1">: WordVectors </span><span class="s2">= </span><span class="s1">WordVectorSerializer</span><span class="s2">.</span><span class="s1">readWord2VecModel</span><span class="s2">(</span><span class="s1">model_file</span><span class="s2">)</span>
+      <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">&quot;Model loaded&quot;</span><span class="s2">)</span>
+
+      <span class="s0">val </span><span class="s2">runtime = </span><span class="s1">Runtime</span><span class="s2">.</span><span class="s1">getRuntime</span>
+      <span class="s0">val </span><span class="s2">operating_system = </span><span class="s1">ManagementFactory</span><span class="s2">.</span><span class="s1">getOperatingSystemMXBean</span>
+      <span class="s3">// Iterate over each word and find words that are semantically close to each other</span>
+      <span class="s1">words_to_evaluate</span><span class="s2">.</span><span class="s1">foreach </span><span class="s2">{ </span><span class="s1">word </span><span class="s2">=&gt;</span>
+
+        <span class="s0">val </span><span class="s2">wordstart_time = </span><span class="s1">System</span><span class="s2">.</span><span class="s1">currentTimeMillis</span><span class="s2">()</span>
+
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">word2vec_model</span><span class="s2">.</span><span class="s1">hasWord</span><span class="s2">(</span><span class="s1">word</span><span class="s2">)) {</span>
+          <span class="s0">val </span><span class="s2">close_words</span><span class="s1">: JCollection</span><span class="s2">[</span><span class="s1">String</span><span class="s2">] = </span><span class="s1">word2vec_model</span><span class="s2">.</span><span class="s1">wordsNearest</span><span class="s2">(</span><span class="s1">word</span><span class="s2">, </span><span class="s6">4</span><span class="s2">)</span>
+          <span class="s0">val </span><span class="s2">close_words_scala = </span><span class="s1">close_words</span><span class="s2">.</span><span class="s1">asScala</span><span class="s2">.</span><span class="s1">mkString</span><span class="s2">(</span><span class="s5">&quot;, &quot;</span><span class="s2">)</span>
+
+          <span class="s3">// Log the result for each word</span>
+          <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">s&quot;Word '</span><span class="s7">$</span><span class="s1">word</span><span class="s5">' is semantically close to words </span><span class="s7">$</span><span class="s1">close_words_scala</span><span class="s5">&quot;</span><span class="s2">)</span>
+          <span class="s1">println</span><span class="s2">(</span><span class="s5">s&quot;Word '</span><span class="s7">$</span><span class="s1">word</span><span class="s5">' is semantically close to words</span><span class="s7">$</span><span class="s1">close_words_scala</span><span class="s5">&quot;</span><span class="s2">)</span>
+          <span class="s3">//get the memory usage</span>
+          <span class="s0">val </span><span class="s2">memory_usage = (</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">totalMemory - runtime</span><span class="s2">.</span><span class="s1">freeMemory</span><span class="s2">)</span><span class="s1">/</span><span class="s2">(</span><span class="s6">1024</span><span class="s1">*</span><span class="s6">1024</span><span class="s2">)</span>
+          <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">s&quot;Memory usage for word-'</span><span class="s7">$</span><span class="s1">word</span><span class="s5">': </span><span class="s7">$</span><span class="s1">memory_usage </span><span class="s5">MB&quot;</span><span class="s2">)</span>
+          <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">s&quot;System load for word-'</span><span class="s7">$</span><span class="s1">word</span><span class="s5">': </span><span class="s7">$</span><span class="s2">{</span><span class="s1">operating_system</span><span class="s2">.</span><span class="s1">getSystemLoadAverage</span><span class="s2">}</span><span class="s5">&quot;</span><span class="s2">)</span>
+
+
+        <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+          <span class="s1">logger</span><span class="s2">.</span><span class="s1">warn</span><span class="s2">(</span><span class="s5">s&quot;Word '</span><span class="s7">$</span><span class="s1">word</span><span class="s5">' not found&quot;</span><span class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">s&quot;Time taken to evaluate word '</span><span class="s7">$</span><span class="s1">word</span><span class="s5">': </span><span class="s7">$</span><span class="s2">{</span><span class="s1">System</span><span class="s2">.</span><span class="s1">currentTimeMillis</span><span class="s2">()</span><span class="s1">-wordstart_time</span><span class="s2">} </span><span class="s5">ms&quot;</span><span class="s2">)</span>
+      <span class="s2">}</span>
+
+
+      <span class="s0">val </span><span class="s2">total_time = </span><span class="s1">System</span><span class="s2">.</span><span class="s1">currentTimeMillis</span><span class="s2">() </span><span class="s1">- start_time</span>
+      <span class="s1">logger</span><span class="s2">.</span><span class="s1">info</span><span class="s2">(</span><span class="s5">s&quot;Total time: </span><span class="s7">$</span><span class="s1">total_time </span><span class="s5">ms&quot;</span><span class="s2">)</span>
+
+    <span class="s2">}</span>
+    <span class="s0">catch </span><span class="s2">{</span>
+      <span class="s0">case </span><span class="s1">e: Exception </span><span class="s2">=&gt;</span>
+        <span class="s1">logger</span><span class="s2">.</span><span class="s1">error</span><span class="s2">(</span><span class="s5">&quot;Error embedding function&quot;</span><span class="s2">, </span><span class="s1">e</span><span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+
+
+
+  <span class="s0">def </span><span class="s4">main</span><span class="s2">(</span><span class="s1">args: Array</span><span class="s2">[</span><span class="s1">String</span><span class="s2">])</span><span class="s1">: Unit </span><span class="s2">= {</span>
+    <span class="s3">// Load configs</span>
+    <span class="s0">val </span><span class="s2">config = </span><span class="s1">ConfigFactory</span><span class="s2">.</span><span class="s1">load</span><span class="s2">()</span>
+    <span class="s0">val </span><span class="s2">model_output_path = </span><span class="s1">config</span><span class="s2">.</span><span class="s1">getString</span><span class="s2">(</span><span class="s5">&quot;trainer.model_output_path&quot;</span><span class="s2">)</span>
+    <span class="s0">val </span><span class="s2">words_to_evaluate = </span><span class="s1">config</span><span class="s2">.</span><span class="s1">getStringList</span><span class="s2">(</span><span class="s5">&quot;words_to_evaluate&quot;</span><span class="s2">).</span><span class="s1">asScala</span><span class="s2">.</span><span class="s1">toList</span>
+
+    <span class="s3">// Call embeddings evaluation</span>
+    <span class="s1">evaluate_embeddings</span><span class="s2">(</span><span class="s1">model_output_path</span><span class="s2">, </span><span class="s1">words_to_evaluate</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

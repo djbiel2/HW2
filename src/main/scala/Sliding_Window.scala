@@ -7,11 +7,11 @@ import com.typesafe.config.ConfigFactory
 
 object Sliding_Window {
 
-//logger
+  //logger
   private val logger = LoggerFactory.getLogger(Sliding_Window.getClass)
 
 
-//Sliding window function on the tokenized data
+  //Sliding window function on the tokenized data
 
   def apply_sliding_window(tokens_array: Array[Int], window_size: Int): Seq[(Array[Int], Int)] = {
     tokens_array.sliding(window_size + 1).collect {

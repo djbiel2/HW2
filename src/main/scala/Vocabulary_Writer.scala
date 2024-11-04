@@ -6,11 +6,11 @@ import com.typesafe.config.ConfigFactory
 
 object Vocabulary_Writer {
 
-//logger
+  //logger
   private val logger = LoggerFactory.getLogger(Vocabulary_Writer.getClass)
 
 
-// Create a vocabulary with frequencies and then save it to output
+  // Create vocabulary word frequencies
 
   def generate_vocabulary_with_frequency(shard_dir: String, output_file_path: String): Unit = {
     try {
@@ -33,7 +33,7 @@ object Vocabulary_Writer {
 
       logger.info(s"Processing shards")
 
-      // go though each shard and count freqencies, make sure that only letters within words are counted not ,.;: etc.
+      // go though each shard and count freqencies
       shard_files.foreach { shard_file =>
         logger.info(s"Shard- ${shard_file.getName}")
         val source = Source.fromFile(shard_file)
@@ -66,12 +66,12 @@ object Vocabulary_Writer {
 
 
   def main(args: Array[String]): Unit = {
-  //load configs
+    //load configs
     val config = ConfigFactory.load()
     val shard_dir = config.getString("vocabulary_writer.shard_dir")
     val output_file_path = config.getString("vocabulary_writer.output_file_path")
 
-   //generate vocabulary with freqency
+    //generate vocabulary with freqency
     generate_vocabulary_with_frequency(shard_dir, output_file_path)
   }
 }

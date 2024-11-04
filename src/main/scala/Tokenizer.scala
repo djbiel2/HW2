@@ -2,16 +2,19 @@ import com.knuddels.jtokkit.Encodings
 import com.knuddels.jtokkit.api.{Encoding, EncodingRegistry, EncodingType, IntArrayList}
 import scala.io.Source
 import java.io.File
+import org.apache.spark.SparkConf
+import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.rdd.RDD
 import org.slf4j.LoggerFactory
 import com.typesafe.config.ConfigFactory
 
 object Tokenizer {
 
-//logger
+  //logger
   private val logger = LoggerFactory.getLogger(Tokenizer.getClass)
 
 
-// Function to tokenize shards
+  // Function to tokenize shards
 
   def tokenize_shard(shard_path: String): IntArrayList = {
     try {
@@ -21,7 +24,7 @@ object Tokenizer {
       val shard_text = Source.fromFile(shard_path).mkString
       val encoded: IntArrayList = encoding.encode(shard_text)
 
-    //check if tokens are empty
+      //check if tokens are empty
       if (encoded.isEmpty) {
         logger.warn(s"Tokens are empty $shard_path")
       } else {
@@ -37,34 +40,44 @@ object Tokenizer {
   }
 
   def main(args: Array[String]): Unit = {
-
+//load configurations
     val config = ConfigFactory.load()
     val shard_directory_path = config.getString("tokenizer.shard_directory")
+    //initialize spark configurations
 
+    val conf = new SparkConf().setAppName("Tokenizer").setMaster("local[*]")
+    val sc = new JavaSparkContext(conf)
+    //check if shard exists
     try {
       val shard_directory = new File(shard_directory_path)
       if (!shard_directory.exists() || !shard_directory.isDirectory) {
-        logger.error(s"Shard directory not found, error")
+        logger.error("Error-shard directory not found ")
         return
       }
 
+      // get shard files here
       val shard_files = shard_directory.listFiles().filter(_.isFile).filter(_.getName.startsWith("shard_"))
       if (shard_files.isEmpty) {
-        logger.warn(s"No shard files found, error")
+        logger.warn("No shard files found in directory")
         return
       }
 
-      // Iterate over all shards
-      shard_files.foreach { shard_file =>
-        logger.info(s"Processing shard- ${shard_file.getName}")
-        val tokenized = tokenize_shard(shard_file.getAbsolutePath)
-        if (!tokenized.isEmpty) {
-          logger.debug(s"Encoded tokens for ${shard_file.getName}")
-        }
+      // Parallelize the paths
+      val shard_paths: RDD[String] = sc.parallelize(shard_files.map(_.getAbsolutePath).toList)
+      val tokenized_shards_rdd: RDD[IntArrayList] = shard_paths.map(tokenize_shard)
+
+      // collect results
+      val tokenized_shards = tokenized_shards_rdd.collect()
+      tokenized_shards.foreach { tokens =>
+        logger.debug(s"Tokenized shard with ${tokens.size()} tokens")
       }
+
     } catch {
       case e: Exception =>
-        logger.error("Processing error for shards for tokens", e)
+        logger.error("Error during tokenization step", e)
+    } finally {
+      // stop spark
+      sc.stop()
     }
   }
 }
