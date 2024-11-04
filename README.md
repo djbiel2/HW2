@@ -19,3 +19,4 @@ Running the program stb compile sbt "runMain Main"
 spark-submit --class Main --master yarn your_path_jar_file.jar
 
 to test use sbt test
+https://youtu.be/8kX8JulKR1k
