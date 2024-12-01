@@ -10,6 +10,8 @@ import scala.util.Random
 import scala.collection.JavaConverters._
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.concurrent.duration.Duration
+import scala.util.control.Breaks._
+
 
 
 object My_LLM extends App {
@@ -89,7 +91,7 @@ object My_LLM extends App {
         }
 
         // build the sentence
-      val sentence = lowercased_words.mkString(" ")
+      val sentence = sentence_words.mkString(" ")
       
       // capitalize and add a period at the end
       val fin_sentence = sentence.capitalize + "."
