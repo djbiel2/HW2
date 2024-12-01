@@ -7,7 +7,9 @@ import org.deeplearning4j.models.embeddings.wordvectors.WordVectors
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{Await, ExecutionContextExecutor}
+import scala.concurrent.duration.Duration
+
 
 object My_LLM extends App {
   implicit val system: ActorSystem = ActorSystem("DawidLLM")
@@ -68,11 +70,16 @@ object My_LLM extends App {
     }
   }
 
-  // Starting server
-Http().newServerAt("0.0.0.0", 8080).bind(route).onComplete {
+// Starting server
+  val bindings = Http().newServerAt("0.0.0.0", 8080).bind(route)
+  bindings.onComplete {
     case scala.util.Success(binding) =>
       logger.info(s"Server successfully started at ${binding.localAddress}")
     case scala.util.Failure(exception) =>
       logger.error("Failed at binding server", exception)
+      system.terminate()
   }
+
+  
+  Await.result(system.whenTerminated, Duration.Inf)
 }
