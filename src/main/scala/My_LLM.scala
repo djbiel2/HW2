@@ -95,9 +95,7 @@ object My_LLM extends App {
       val fin_sentence = sentence.capitalize + "."
       
       fin_sentence
-    } else {
-      "Please try again later, Dawid is OoO."
-    }
+    } 
   } catch {
     case e: Exception =>
       logger.error("Error during generating response", e)
