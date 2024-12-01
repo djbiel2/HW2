@@ -62,7 +62,8 @@ object My_LLM extends App {
     val close_words = words.flatMap { word =>
       if (word2VecModel.hasWord(word)) {
         //get 10 closest words
-        word2VecModel.wordsNearest(word, 10).asScala
+        val raw_words = word2VecModel.wordsNearest(word, 10).asScala
+        raw_words.map(_.replaceAll("[^a-zA-Z]", "")).filterNot(_.isEmpty)
       } else {
         Seq.empty[String]
       }
