@@ -59,16 +59,16 @@ object My_LLM extends App {
     val words = query.split("\\s+")
     
     // get close words from my model 
-    val close_words = words.flatMap { word =>
+    val close_words: Seq[String] = words.flatMap { word =>
       if (word2VecModel.hasWord(word)) {
-        //get 10 closest words
+        
         val raw_words: java.util.Collection[String] = word2VecModel.wordsNearest(word, 10)
         val scala_words: Seq[String] = raw_words.asScala.toSeq
         scala_words.map(_.replaceAll("[^a-zA-Z]", "")).filterNot(_.isEmpty)
       } else {
         Seq.empty[String]
       }
-    }
+    }.toSeq 
 
     if (close_words.nonEmpty) {
       val random = new Random()
