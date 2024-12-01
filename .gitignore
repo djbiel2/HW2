@@ -45,3 +45,7 @@ build/
 
 ### Scala ###
 .bsp/
+
+rsa
+rsa.pub"rsa" 
+"rsa.pub" 
