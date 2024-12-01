@@ -103,6 +103,10 @@ object Main {
       logger.info(s"Evaluating embeddings from model at $model_output_path.")
       Embedding_Evaluator.evaluate_embeddings(model_output_path, words_to_evaluate)
       logger.info("Embedding evaluation has been completed")
+
+      logger.info("Starting HTTP server")
+      My_LLM.main(Array.empty)
+      logger.info("HTTP server started successfully")
     } catch {
       case e: Exception =>
         logger.error("An error occurred during the main process", e)

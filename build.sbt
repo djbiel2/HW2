@@ -23,6 +23,11 @@ lazy val root = (project in file("."))
       "org.apache.hadoop" % "hadoop-common" % "3.4.0",
       "org.apache.hadoop" % "hadoop-mapreduce-client-core" % "3.4.0",
       "org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % "3.4.0",
+     //dependencies for http
+      "com.typesafe.akka" %% "akka-http" % "10.5.3",
+      "com.typesafe.akka" %% "akka-stream" % "2.8.6",
+      "de.heikoseeberger" %% "akka-http-circe" % "1.39.2",
+
 
       // Dependencies for Apache Spark with SLF4J exclusions
       "org.apache.spark" %% "spark-core" % "3.5.0" exclude("org.slf4j", "slf4j-log4j12"),
