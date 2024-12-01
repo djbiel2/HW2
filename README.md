@@ -14,6 +14,6 @@ sudo sbt "runMain My_LLM"
 
 The server is now running and accepting connections. Open up your aws instance and check the IP, then go to its 8080 port to access the application
 
-
+https://youtu.be/qOZQglp8IKo
 
 
