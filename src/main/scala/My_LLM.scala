@@ -16,10 +16,18 @@ object My_LLM extends App {
 
   // Load configs
   val config = ConfigFactory.load()
-  val model_out_path = config.getString("trainer.model_output_path")
+  val model_out_path = sys.env.getOrElse("MODEL_OUTPUT_PATH", config.getString("trainer.model_output_path"))
+  logger.info(s"Loading model $model_out_path")
 
   // Load the trained model
-  val word2VecModel: WordVectors = WordVectorSerializer.readWord2VecModel(model_out_path)
+  val word2VecModel: WordVectors = try {
+    WordVectorSerializer.readWord2VecModel(model_out_path)
+  } catch {
+    case e: Exception =>
+      logger.error(s"Failed to load $model_out_path", e)
+    
+      sys.exit(1)
+  }
   logger.info("Model loaded successfully")
 
   // Serve HTML page
