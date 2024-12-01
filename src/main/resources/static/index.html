@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dawid's LLM</title>
     <style>
-        /* General styles */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden; /* Prevent scrollbars */
+            overflow: hidden;
             background-color: #121212;
             font-family: Arial, sans-serif;
             color: #ffffff;
@@ -25,22 +24,19 @@
 
         .word {
             position: absolute;
-            font-size: 1rem;
+            font-size: 1.5rem;
             color: #ffffff;
             opacity: 0.8;
-            animation: float 10s linear infinite;
+            animation: floatFromLeft 15s linear infinite;
         }
 
-        @keyframes float {
+        @keyframes floatFromLeft {
             0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 0.8;
-            }
-            50% {
+                transform: translateX(-100%);
                 opacity: 1;
             }
             100% {
-                transform: translate(calc(100vw - 50px), calc(100vh - 50px)) scale(1.5);
+                transform: translateX(100vw);
                 opacity: 0;
             }
         }
@@ -105,10 +101,7 @@
     </style>
 </head>
 <body>
-<!-- Word Animation Container -->
 <div id="word-container"></div>
-
-<!-- Main Content -->
 <div class="container">
     <h1>Dawid's LLM</h1>
     <div class="input-box">
@@ -117,57 +110,49 @@
     <button onclick="generateText()">Generate</button>
     <div class="output" id="output"></div>
 </div>
-
 <script>
-    // Fetch words from vocabulary.csv dynamically
     async function fetchWords() {
-        const response = await fetch("vocabulary.csv"); // Load the vocabulary file
+        const response = await fetch("vocabulary.csv");
         const text = await response.text();
-        const rows = text.split("\n").slice(1); // Split into rows, skip the header
-        const words = rows.map(row => row.split(",")[0]).filter(word => word.length > 0); // Extract words from the first column
+        const rows = text.split("\n").slice(1);
+        const words = rows.map(row => row.split(",")[0]).filter(word => word.length > 0);
         return words;
     }
 
-    // Create floating words animation
-    function createFloatingWords(words) {
-        const wordContainer = document.getElementById("word-container");
+    function createWordElement(word) {
+        const wordElement = document.createElement("div");
+        wordElement.className = "word";
+        wordElement.innerText = word;
 
-        // Randomly select words to animate
-        const selectedWords = [];
-        for (let i = 0; i < 20; i++) {
-            selectedWords.push(words[Math.floor(Math.random() * words.length)]);
-        }
+        const startY = Math.random() * window.innerHeight;
+        const duration = Math.random() * 7 + 10;
 
-        selectedWords.forEach(word => {
-            const wordElement = document.createElement("div");
-            wordElement.className = "word";
-            wordElement.innerText = word;
+        wordElement.style.top = `${startY}px`;
+        wordElement.style.animationDuration = `${duration}s`;
 
-            // Randomize position and animation duration
-            const startX = Math.random() * window.innerWidth;
-            const startY = Math.random() * window.innerHeight;
-            const duration = Math.random() * 10 + 5; // Random duration between 5-15 seconds
-
-            wordElement.style.left = `${startX}px`;
-            wordElement.style.top = `${startY}px`;
-            wordElement.style.animationDuration = `${duration}s`;
-
-            wordContainer.appendChild(wordElement);
-
-            // Remove the word after animation ends
-            setTimeout(() => {
-                wordElement.remove();
-            }, duration * 1000);
-        });
-
-        // Repeat animation every 3 seconds
-        setTimeout(() => createFloatingWords(words), 3000);
+        return wordElement;
     }
 
-    // Initialize the animation
+    function addFloatingWord(word) {
+        const wordContainer = document.getElementById("word-container");
+        const wordElement = createWordElement(word);
+
+        wordContainer.appendChild(wordElement);
+
+        setTimeout(() => {
+            wordElement.remove();
+        }, 15000);
+    }
+
+    function createFloatingWords(words) {
+        setInterval(() => {
+            const randomWord = words[Math.floor(Math.random() * words.length)];
+            addFloatingWord(randomWord);
+        }, 700);
+    }
+
     fetchWords().then(words => createFloatingWords(words));
 
-    // Function to handle text generation
     async function generateText() {
         const input = document.getElementById("input").value;
         const response = await fetch("/api/generate", {
