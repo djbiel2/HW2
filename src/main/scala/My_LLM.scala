@@ -61,7 +61,7 @@ object My_LLM extends App {
   }
 
   // Starting server
-Http().newServerAt("18.235.35.80", 80).bind(route).onComplete {
+Http().newServerAt("0.0.0.0", 80).bind(route).onComplete {
     case scala.util.Success(binding) =>
       logger.info(s"Server successfully started at ${binding.localAddress}")
     case scala.util.Failure(exception) =>
