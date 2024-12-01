@@ -55,7 +55,7 @@ object My_LLM extends App {
     } catch {
       case e: Exception =>
         logger.error("Error generating response", e)
-        "An error occurred while generating the response."
+        "An error occurred during response."
     }
   }
 
