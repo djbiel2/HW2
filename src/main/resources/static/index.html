@@ -112,7 +112,7 @@
 </div>
 <script>
     async function fetchWords() {
-        const response = await fetch("vocabulary.csv");
+        const response = await fetch("/static/vocabulary.csv");
         const text = await response.text();
         const rows = text.split("\n").slice(1);
         const words = rows.map(row => row.split(",")[0]).filter(word => word.length > 0);
