@@ -7,7 +7,7 @@ import org.deeplearning4j.models.embeddings.wordvectors.WordVectors
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
 import scala.util.Random
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConverters._
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.concurrent.duration.Duration
 
@@ -62,8 +62,9 @@ object My_LLM extends App {
     val close_words = words.flatMap { word =>
       if (word2VecModel.hasWord(word)) {
         //get 10 closest words
-        val raw_words = word2VecModel.wordsNearest(word, 10).asScala
-        raw_words.map(_.replaceAll("[^a-zA-Z]", "")).filterNot(_.isEmpty)
+        val raw_words: java.util.Collection[String] = word2VecModel.wordsNearest(word, 10)
+        val scala_words: Seq[String] = raw_words.asScala.toSeq
+        scala_words.map(_.replaceAll("[^a-zA-Z]", "")).filterNot(_.isEmpty)
       } else {
         Seq.empty[String]
       }
