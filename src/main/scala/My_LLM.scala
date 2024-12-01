@@ -54,33 +54,42 @@ object My_LLM extends App {
 
   // generate a resposne
   def response_generator(query: String): String = {
-  try {
-    // split query
-    val words = query.split("\\s+")
-    
-    // get close words from my model 
-    val close_words: Seq[String] = words.flatMap { word =>
-      if (word2VecModel.hasWord(word)) {
-        
-        val raw_words: java.util.Collection[String] = word2VecModel.wordsNearest(word, 10)
-        val scala_words: Seq[String] = raw_words.asScala.toSeq
-        scala_words.map(_.replaceAll("[^a-zA-Z]", "")).filterNot(_.isEmpty)
-      } else {
-        Seq.empty[String]
-      }
-    }.toSeq 
+    try {
+      // preprocess the query
+      val cleaned_query = query.toLowerCase.replaceAll("[^a-z\\s]", "").trim
+      val initial_words = cleaned_query.split("\\s+").filter(word2VecModel.hasWord).toList
 
-    if (close_words.nonEmpty) {
-      val random = new Random()
-      
-      // get a random words
-      val number_words = 5 + random.nextInt(6)
-      
-      // 
-      val sel_words = random.shuffle(close_words).take(number_words)
-      
-      // make them into a sentence
-      val sentence = sel_words.mkString(" ")
+      if (initial_words.isEmpty) {
+        "Please ask away!"
+      } else {
+        val random = new Random()
+        val max_sentence_length = 5 + random.nextInt(6) // random length between 5 and 10
+        var sentence_words = initial_words
+
+        // generate
+        breakable {
+          while (sentence_words.length < max_sentence_length) {
+            val last_word = sentence_words.last
+            // get the 10 nearest words to the last word
+            val raw_words: java.util.Collection[String] = word2VecModel.wordsNearest(last_word, 10)
+            val scala_words: Seq[String] = raw_words.asScala.toSeq
+              .map(_.replaceAll("[^a-zA-Z]", "").toLowerCase)
+              .filterNot(_.isEmpty)
+              .filter(word2VecModel.hasWord) // ensure the word exists in the model
+
+            // if no related words are found break the loop
+            if (scala_words.isEmpty) {
+              break
+            }
+
+            // select the next word
+            val next_word = scala_words.head
+            sentence_words = sentence_words :+ next_word
+          }
+        }
+
+        // build the sentence
+      val sentence = lowercased_words.mkString(" ")
       
       // capitalize and add a period at the end
       val fin_sentence = sentence.capitalize + "."
