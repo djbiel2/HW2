@@ -61,5 +61,5 @@ object My_LLM extends App {
 
   //starting server
   Http().newServerAt("0.0.0.0", 80).bind(route)
-  logger.info("Server successfuly started http://localhost:8080/")
+  logger.info("Server successfuly started")
 }
